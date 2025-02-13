@@ -352,6 +352,56 @@ router.put("/update/:id", (req, res) => {
 
 /**
  * @swagger
+ * /orders/update-payment/{id}:
+ *   put:
+ *     summary: Cập nhật trạng thái thanh toán của đơn hàng
+ *     tags: [Orders]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID của đơn hàng cần cập nhật payment
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               payment:
+ *                 type: integer
+ *                 description: Trạng thái thanh toán (0 - chưa thanh toán, 1 - đã thanh toán)
+ *                 example: 1
+ *     responses:
+ *       200:
+ *         description: Trạng thái thanh toán đã được cập nhật thành công
+ *       400:
+ *         description: Lỗi khi cập nhật payment hoặc order không tồn tại
+ *       500:
+ *         description: Lỗi máy chủ
+ */
+router.put("/update-payment/:id", (req, res) => {
+  const orderId = parseInt(req.params.id);
+  const { payment } = req.body;
+
+  if (isNaN(orderId) || typeof payment !== "number") {
+    return res.status(400).json({
+      success: false,
+      message: "Dữ liệu không hợp lệ",
+      error: "ID đơn hàng hoặc payment không đúng định dạng",
+    });
+  }
+
+  OrderModel.updatePayment(orderId, payment, (result) => {
+    res.status(result.success ? 200 : 500).json(result);
+  });
+});
+
+
+/**
+ * @swagger
  * /orders/cancel/{id}:
  *   put:
  *     summary: Hủy đơn hàng
